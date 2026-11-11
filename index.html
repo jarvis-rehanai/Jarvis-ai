@@ -5,80 +5,185 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>JARVIS AI</title>
+
 <style>
 body {
-  background:#06131b;color:#00e5ff;
-  font-family:Arial;text-align:center;
+  background:#06131b;
+  color:#00e5ff;
+  font-family:Arial;
+  text-align:center;
   padding:25px 12px;
 }
 h1 {font-size:40px}
 .circle {
-  width:145px;height:145px;
+  width:145px;
+  height:145px;
   border:3px solid #00e5ff;
-  border-radius:50%;margin:30px auto;
-  display:grid;place-items:center;
+  border-radius:50%;
+  margin:30px auto;
+  display:grid;
+  place-items:center;
   box-shadow:0 0 30px #00e5ff;
 }
 button {
-  background:#00e5ff;border:0;
-  padding:14px 22px;border-radius:25px;
-  margin:8px;font-size:16px;
+  background:#00e5ff;
+  border:0;
+  padding:14px 22px;
+  border-radius:25px;
+  margin:8px;
+  font-size:16px;
 }
 #heard {color:white;min-height:30px}
 </style>
 </head>
+
 <body>
 
 <h1>J.A.R.V.I.S</h1>
 <p>DUAL MODE PERSONAL ASSISTANT</p>
+
 <div class="circle">JARVIS</div>
 
 <h3 id="status">System Online</h3>
 <p id="heard">Waiting for command...</p>
 
 <button onclick="listen()">🎤 TALK TO JARVIS</button>
+
 <button onclick="speak('Namaste Rehan! Jarvis online hai.')">
 START JARVIS
 </button>
 
 <script>
+
 let userName = "Rehan";
 
 function speak(message) {
   speechSynthesis.cancel();
+
   let voice = new SpeechSynthesisUtterance(message);
   voice.lang = "hi-IN";
   voice.rate = 0.9;
+
+  voice.onend = function() {
+    document.getElementById("status").innerText =
+      "System Online";
+  };
+
   speechSynthesis.speak(voice);
 }
 
-function answer(command) {
-  let c = command.toLowerCase();
+async function answer(command) {
+
+  let c = command.toLowerCase()
+    .replace(/[.,?!।]/g, "")
+    .trim();
+
   let reply = "";
 
-  if (c.includes("time") || c.includes("समय")) {
-    reply = "Abhi samay hai " +
-      new Date().toLocaleTimeString("en-IN");
-  }
-  else if (c.includes("date") || c.includes("तारीख")) {
-    reply = "Aaj ki tareekh hai " +
-      new Date().toLocaleDateString("en-IN");
-  }
-  else if (c.includes("naam") || c.includes("नाम")) {
-    reply = "Aapka naam " + userName + " hai.";
-  }
-  else if (c.includes("hello") || c.includes("नमस्ते")) {
-    reply = "Namaste! Main Jarvis hoon. Kaise madad karun?";
-  }
-  else {
-    reply = "Ye command abhi mujhe nahi aati. Main ise seekh sakta hoon.";
+  // TIME COMMAND
+  if (
+    c.includes("time") ||
+    c.includes("samay") ||
+    c.includes("waqt") ||
+    c.includes("kitne baje") ||
+    c.includes("baj rahe") ||
+    c.includes("समय") ||
+    c.includes("कितने बजे")
+  ) {
+    let time = new Date().toLocaleTimeString(
+      "en-IN",
+      {hour:"2-digit",minute:"2-digit",hour12:true}
+    );
+
+    reply = "Rehan, abhi " + time + " baj rahe hain.";
   }
 
-  document.getElementById("status").innerText = "Responding";
+  // DATE COMMAND
+  else if (
+    c.includes("date") ||
+    c.includes("tareekh") ||
+    c.includes("tarikh") ||
+    c.includes("तारीख") ||
+    c.includes("आज की डेट")
+  ) {
+    let date = new Date().toLocaleDateString(
+      "en-IN",
+      {day:"numeric",month:"long",year:"numeric"}
+    );
+
+    reply = "Rehan, aaj ki tareekh " + date + " hai.";
+  }
+
+  // DAY COMMAND
+  else if (
+    c.includes("kaunsa din") ||
+    c.includes("kaun sa din") ||
+    c.includes("aaj ka din") ||
+    c.includes("day") ||
+    c.includes("weekday") ||
+    c.includes("कौन सा दिन") ||
+    c.includes("आज कौन सा दिन")
+  ) {
+    let day = new Date().toLocaleDateString(
+      "en-IN",
+      {weekday:"long"}
+    );
+
+    reply = "Rehan, aaj " + day + " hai.";
+  }
+
+  // NAME COMMAND
+  else if (
+    c.includes("naam") ||
+    c.includes("name") ||
+    c.includes("naam kya") ||
+    c.includes("नाम")
+  ) {
+    reply = "Aapka naam " + userName + " hai, Rehan.";
+  }
+
+  // BATTERY COMMAND
+  else if (
+    c.includes("battery") ||
+    c.includes("बैटरी")
+  ) {
+    try {
+      if (navigator.getBattery) {
+        let battery = await navigator.getBattery();
+        let level = Math.round(battery.level * 100);
+        reply = "Rehan, aapke phone ki battery " +
+          level + " percent hai.";
+      } else {
+        reply = "Battery information is device par available nahi hai.";
+      }
+    } catch (error) {
+      reply = "Battery information nahi mil paayi.";
+    }
+  }
+
+  // GREETING
+  else if (
+    c.includes("hello") ||
+    c.includes("hi jarvis") ||
+    c.includes("namaste") ||
+    c.includes("नमस्ते")
+  ) {
+    reply = "Namaste Rehan! Main Jarvis hoon. Kaise madad karun?";
+  }
+
+  // UNKNOWN COMMAND
+  else {
+    reply = "Sorry Rehan, ye command abhi mujhe nahi aati.";
+  }
+
+  document.getElementById("status").innerText =
+    "Responding";
+
   speak(reply);
 }
 
 function listen() {
+
   const Recognition =
     window.SpeechRecognition ||
     window.webkitSpeechRecognition;
@@ -90,32 +195,51 @@ function listen() {
   }
 
   let recognition = new Recognition();
+
   recognition.lang = "hi-IN";
   recognition.continuous = false;
+  recognition.interimResults = false;
 
-  document.getElementById("status").innerText = "Listening...";
+  document.getElementById("status").innerText =
+    "Listening...";
 
   recognition.onresult = function(event) {
-    let command = event.results[0][0].transcript;
+
+    let command =
+      event.results[0][0].transcript;
+
     document.getElementById("heard").innerText =
       "You said: " + command;
+
     answer(command);
   };
 
-  recognition.onerror = function() {
-    document.getElementById("status").innerText = "Mic error";
+  recognition.onerror = function(event) {
+    document.getElementById("status").innerText =
+      "Mic error: " + event.error;
   };
 
   recognition.onend = function() {
-    if (document.getElementById("status").innerText === "Listening...") {
-      document.getElementById("status").innerText = "System Online";
+    if (
+      document.getElementById("status").innerText ===
+      "Listening..."
+    ) {
+      document.getElementById("status").innerText =
+        "System Online";
     }
   };
 
-  recognition.start();
+  try {
+    recognition.start();
+  } catch (error) {
+    document.getElementById("status").innerText =
+      "Please try again";
+  }
 }
+
 </script>
 </body>
 </html>
+
 
 
