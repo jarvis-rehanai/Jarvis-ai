@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JARVIS AI</title>
+  <style>
+    body {
+      background: #07131b;
+      color: #00e5ff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px 15px;
+    }
+    h1 { font-size: 42px; }
+    .circle {
+      border: 3px solid #00e5ff;
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+      margin: 35px auto;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 30px #00e5ff;
+    }
+    button {
+      background: #00e5ff;
+      border: 0;
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-size: 17px;
+    }
+  </style>
+</head>
+<body>
+  <h1>J.A.R.V.I.S</h1>
+  <p>YOUR PERSONAL AI ASSISTANT</p>
+  <div class="circle">JARVIS</div>
+  <h3 id="status">System Online</h3>
+  <button onclick="startJarvis()">START JARVIS</button>
+
+  <script>
+    function startJarvis() {
+      document.getElementById("status").innerText =
+        "Hello! I am Jarvis.";
+      const speech = new SpeechSynthesisUtterance(
+        "Hello! I am Jarvis. How can I help you?"
+      );
+      speech.lang = "en-IN";
+      speechSynthesis.speak(speech);
+    }
+  </script>
+</body>
+</html>
