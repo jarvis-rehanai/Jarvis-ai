@@ -3,110 +3,119 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>JARVIS AI</title>
 <style>
 body {
-  background:#06131b;
-  color:#00e5ff;
-  font-family:Arial;
-  text-align:center;
-  padding:35px 15px;
+  background:#06131b;color:#00e5ff;
+  font-family:Arial;text-align:center;
+  padding:25px 12px;
 }
-h1 {font-size:42px;}
+h1 {font-size:40px}
 .circle {
-  width:150px;height:150px;
+  width:145px;height:145px;
   border:3px solid #00e5ff;
-  border-radius:50%;
-  margin:35px auto;
+  border-radius:50%;margin:30px auto;
   display:grid;place-items:center;
   box-shadow:0 0 30px #00e5ff;
 }
 button {
-  background:#00e5ff;
-  border:0;border-radius:30px;
-  padding:15px 25px;
-  margin:10px;font-size:17px;
+  background:#00e5ff;border:0;
+  padding:14px 22px;border-radius:25px;
+  margin:8px;font-size:16px;
 }
-#heard {color:white;min-height:30px;}
+#heard {color:white;min-height:30px}
 </style>
 </head>
 <body>
 
 <h1>J.A.R.V.I.S</h1>
-<p>YOUR PERSONAL AI ASSISTANT</p>
-
+<p>DUAL MODE PERSONAL ASSISTANT</p>
 <div class="circle">JARVIS</div>
 
 <h3 id="status">System Online</h3>
-<p id="heard">Waiting for your command...</p>
+<p id="heard">Waiting for command...</p>
 
-<button onclick="startListening()">🎤 TALK TO JARVIS</button>
-<button onclick="speak('Namaste! Main Jarvis hoon. Kaise madad kar sakta hoon?')">
+<button onclick="listen()">🎤 TALK TO JARVIS</button>
+<button onclick="speak('Namaste Rehan! Jarvis online hai.')">
 START JARVIS
 </button>
 
 <script>
+let userName = "Rehan";
+
 function speak(message) {
   speechSynthesis.cancel();
-  const voice = new SpeechSynthesisUtterance(message);
+  let voice = new SpeechSynthesisUtterance(message);
   voice.lang = "hi-IN";
   voice.rate = 0.9;
   speechSynthesis.speak(voice);
 }
 
-function startListening() {
+function answer(command) {
+  let c = command.toLowerCase();
+  let reply = "";
+
+  if (c.includes("time") || c.includes("समय")) {
+    reply = "Abhi samay hai " +
+      new Date().toLocaleTimeString("en-IN");
+  }
+  else if (c.includes("date") || c.includes("तारीख")) {
+    reply = "Aaj ki tareekh hai " +
+      new Date().toLocaleDateString("en-IN");
+  }
+  else if (c.includes("naam") || c.includes("नाम")) {
+    reply = "Aapka naam " + userName + " hai.";
+  }
+  else if (c.includes("hello") || c.includes("नमस्ते")) {
+    reply = "Namaste! Main Jarvis hoon. Kaise madad karun?";
+  }
+  else {
+    reply = "Ye command abhi mujhe nahi aati. Main ise seekh sakta hoon.";
+  }
+
+  document.getElementById("status").innerText = "Responding";
+  speak(reply);
+}
+
+function listen() {
   const Recognition =
     window.SpeechRecognition ||
     window.webkitSpeechRecognition;
 
   if (!Recognition) {
     document.getElementById("status").innerText =
-      "Speech recognition not supported";
+      "Speech recognition unavailable";
     return;
   }
 
-  const recognition = new Recognition();
+  let recognition = new Recognition();
   recognition.lang = "hi-IN";
   recognition.continuous = false;
-  recognition.interimResults = false;
 
-  document.getElementById("status").innerText =
-    "Listening...";
+  document.getElementById("status").innerText = "Listening...";
 
   recognition.onresult = function(event) {
-    const command =
-      event.results[0][0].transcript;
-
+    let command = event.results[0][0].transcript;
     document.getElementById("heard").innerText =
       "You said: " + command;
-
-    document.getElementById("status").innerText =
-      "Command received";
-
-    const reply = "Aapne kaha " + command +
-      ". Main aapki baat sun raha hoon.";
-
-    speak(reply);
+    answer(command);
   };
 
   recognition.onerror = function() {
-    document.getElementById("status").innerText =
-      "Microphone error. Please try again.";
+    document.getElementById("status").innerText = "Mic error";
   };
 
   recognition.onend = function() {
-    if (document.getElementById("status").innerText
-      === "Listening...") {
-      document.getElementById("status").innerText =
-        "System Online";
+    if (document.getElementById("status").innerText === "Listening...") {
+      document.getElementById("status").innerText = "System Online";
     }
   };
 
   recognition.start();
 }
 </script>
-
 </body>
 </html>
+
 
