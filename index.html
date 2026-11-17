@@ -1,264 +1,814 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JARVIS AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#06131b">
+<title>J.A.R.V.I.S AI</title>
 
 <style>
+:root {
+  --cyan: #00e5ff;
+  --bg: #06131b;
+  --panel: #0c202b;
+  --text: #e9fbff;
+  --muted: #8baab5;
+}
+
+* { box-sizing: border-box; }
+
 body {
-  background:#06131b;
-  color:#00e5ff;
-  font-family:Arial;
-  text-align:center;
-  padding:25px 12px;
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #123443, var(--bg) 65%);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 24px 14px;
 }
-h1 {font-size:40px}
+
+header { margin-bottom: 20px; }
+
+h1 {
+  color: var(--cyan);
+  font-size: clamp(32px, 8vw, 46px);
+  letter-spacing: 5px;
+  margin: 10px 0;
+  text-shadow: 0 0 18px #00e5ff80;
+}
+
+.subtitle {
+  color: var(--muted);
+  letter-spacing: 3px;
+  font-size: 11px;
+}
+
+.dashboard {
+  max-width: 620px;
+  margin: auto;
+}
+
 .circle {
-  width:145px;
-  height:145px;
-  border:3px solid #00e5ff;
-  border-radius:50%;
-  margin:30px auto;
-  display:grid;
-  place-items:center;
-  box-shadow:0 0 30px #00e5ff;
+  width: 145px;
+  height: 145px;
+  border: 3px solid var(--cyan);
+  border-radius: 50%;
+  margin: 28px auto;
+  display: grid;
+  place-items: center;
+  color: var(--cyan);
+  font-size: 22px;
+  font-weight: bold;
+  box-shadow: 0 0 20px #00e5ff80,
+              inset 0 0 20px #00e5ff30;
+  transition: .3s;
 }
+
+.circle.active {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow: 0 0 45px var(--cyan),
+                inset 0 0 30px #00e5ff70;
+  }
+}
+
+.panel {
+  background: #0c202be8;
+  border: 1px solid #00e5ff40;
+  border-radius: 16px;
+  padding: 18px;
+  margin: 15px 0;
+  text-align: left;
+}
+
+.status {
+  text-align: center;
+  color: var(--cyan);
+  font-weight: bold;
+  margin: 12px;
+}
+
+#heard {
+  color: white;
+  min-height: 25px;
+  overflow-wrap: anywhere;
+}
+
+.chat {
+  height: 230px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  padding: 12px;
+  border-radius: 12px;
+  max-width: 90%;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.user {
+  background: #07536a;
+  align-self: flex-end;
+}
+
+.jarvis {
+  background: #17313e;
+  border: 1px solid #00e5ff40;
+  align-self: flex-start;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 button {
-  background:#00e5ff;
-  border:0;
-  padding:14px 22px;
-  border-radius:25px;
-  margin:8px;
-  font-size:16px;
+  background: var(--cyan);
+  color: #06131b;
+  border: 0;
+  padding: 13px 18px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
 }
-#heard {color:white;min-height:30px}
+
+button.secondary {
+  background: #17313e;
+  color: var(--cyan);
+  border: 1px solid var(--cyan);
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  background: #06131b;
+  color: white;
+  border: 1px solid #00e5ff70;
+  border-radius: 25px;
+  padding: 13px;
+  outline: none;
+}
+
+footer {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 25px;
+}
+
 </style>
 </head>
 
 <body>
 
-<h1>J.A.R.V.I.S</h1>
-<p>DUAL MODE PERSONAL ASSISTANT</p>
+<div class="dashboard">
 
-<div class="circle">JARVIS</div>
+<header>
+  <h1>J.A.R.V.I.S</h1>
+  <div class="subtitle">
+    JUST A RATHER VERY INTELLIGENT SYSTEM
+  </div>
+</header>
 
-<h3 id="status">System Online</h3>
-<p id="heard">Waiting for command...</p>
+<div class="circle" id="circle">JARVIS</div>
 
-<button onclick="listen()">🎤 TALK TO JARVIS</button>
+<div class="status" id="status">
+  SYSTEM ONLINE
+</div>
 
-<button onclick="speak('Namaste Rehan! Jarvis online hai.')">
-START JARVIS
-</button>
+<div class="panel">
+  <strong>PERSONAL ASSISTANT</strong>
+  <p id="heard">Waiting for your command, Sir...</p>
+</div>
+
+<div class="panel">
+  <strong>CONVERSATION</strong>
+  <div class="chat" id="chat">
+    <div class="message jarvis">
+      Namaste Sir! I am JARVIS.
+      Your personal AI assistant is ready.
+      How may I help you today?
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="micButton" onclick="listen()">
+    🎤 TALK TO JARVIS
+  </button>
+
+  <button class="secondary" onclick="startJarvis()">
+    START JARVIS
+  </button>
+
+  <button class="secondary" onclick="stopSpeaking()">
+    STOP VOICE
+  </button>
+</div>
+
+<div class="panel">
+  <strong>TEXT COMMAND</strong>
+
+  <div class="input-row">
+    <input
+      id="messageInput"
+      type="text"
+      placeholder="Type your command, Sir..."
+      autocomplete="off"
+    >
+    <button onclick="sendTypedMessage()">SEND</button>
+  </div>
+</div>
+
+<footer>
+  J.A.R.V.I.S AI • PERSONAL INTELLIGENCE SYSTEM
+  <br><br>
+  PRIVATE USER PROFILE • REHAN
+</footer>
+
+</div>
 
 <script>
 
-let userName = "Rehan";
+// =====================================
+// JARVIS CONFIGURATION
+// =====================================
 
-function speak(message) {
-  speechSynthesis.cancel();
+const USER_NAME = "Rehan";
+const USER_TITLE = "Sir";
 
-  let voice = new SpeechSynthesisUtterance(message);
-  voice.lang = "hi-IN";
-  voice.rate = 0.9;
+const WORKER_URL =
+"https://sparkling-violet-f98cjarvis-ai.liteh445.workers.dev";
 
-  voice.onend = function() {
-    document.getElementById("status").innerText =
-      "System Online";
-  };
+const MAX_HISTORY = 8;
 
-  speechSynthesis.speak(voice);
+let conversation = [];
+let recognition = null;
+let isListening = false;
+let isThinking = false;
+
+// =====================================
+// ELEMENTS
+// =====================================
+
+const statusElement =
+document.getElementById("status");
+
+const heardElement =
+document.getElementById("heard");
+
+const chatElement =
+document.getElementById("chat");
+
+const circleElement =
+document.getElementById("circle");
+
+const micButton =
+document.getElementById("micButton");
+
+// =====================================
+// STATUS
+// =====================================
+
+function setStatus(message, active = false) {
+  statusElement.innerText = message;
+  circleElement.classList.toggle("active", active);
 }
 
-async function answer(command) {
+// =====================================
+// SPEECH SYSTEM
+// =====================================
 
-  let c = command.toLowerCase()
-    .replace(/[.,?!।]/g, "")
-    .trim();
+function speak(message) {
 
-  let reply = "";
+  if (!message) return;
 
-  // TIME COMMAND
+  if (!("speechSynthesis" in window)) {
+    return;
+  }
+
+  speechSynthesis.cancel();
+
+  const speech =
+    new SpeechSynthesisUtterance(message);
+
+  const voices = speechSynthesis.getVoices();
+
+  const hindiVoice = voices.find(
+    v => v.lang.toLowerCase() === "hi-in"
+  );
+
+  const indianEnglishVoice = voices.find(
+    v => v.lang.toLowerCase() === "en-in"
+  );
+
+  if (hindiVoice) {
+    speech.voice = hindiVoice;
+    speech.lang = "hi-IN";
+  } else if (indianEnglishVoice) {
+    speech.voice = indianEnglishVoice;
+    speech.lang = "en-IN";
+  } else {
+    speech.lang = "hi-IN";
+  }
+
+  speech.rate = 0.92;
+  speech.pitch = 1;
+  speech.volume = 1;
+
+  speech.onstart = () => {
+    setStatus("JARVIS SPEAKING", true);
+  };
+
+  speech.onend = () => {
+    if (!isListening && !isThinking) {
+      setStatus("SYSTEM ONLINE");
+    }
+  };
+
+  speech.onerror = () => {
+    if (!isListening && !isThinking) {
+      setStatus("SYSTEM ONLINE");
+    }
+  };
+
+  speechSynthesis.speak(speech);
+}
+
+function stopSpeaking() {
+  speechSynthesis.cancel();
+  setStatus("VOICE STOPPED");
+}
+
+// =====================================
+// CHAT DISPLAY
+// =====================================
+
+function addMessage(message, sender) {
+
+  const div = document.createElement("div");
+
+  div.className = "message " + sender;
+
+  // Safe text rendering
+  div.textContent = message;
+
+  chatElement.appendChild(div);
+
+  chatElement.scrollTop =
+    chatElement.scrollHeight;
+}
+
+// =====================================
+// CONVERSATION MEMORY
+// =====================================
+
+function saveConversation(user, assistant) {
+
+  conversation.push({
+    role: "user",
+    content: user
+  });
+
+  conversation.push({
+    role: "assistant",
+    content: assistant
+  });
+
+  if (conversation.length > MAX_HISTORY) {
+    conversation =
+      conversation.slice(-MAX_HISTORY);
+  }
+}
+
+// =====================================
+// LOCAL COMMANDS
+// =====================================
+
+async function localCommand(command) {
+
+  const c = command.toLowerCase().trim();
+
+  // TIME
   if (
     c.includes("time") ||
     c.includes("samay") ||
     c.includes("waqt") ||
-    c.includes("kitne baje") ||
-    c.includes("baj rahe") ||
-    c.includes("समय") ||
-    c.includes("कितने बजे")
+    c.includes("kitne baje")
   ) {
-    let time = new Date().toLocaleTimeString(
+    const time = new Date().toLocaleTimeString(
       "en-IN",
-      {hour:"2-digit",minute:"2-digit",hour12:true}
+      {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      }
     );
 
-    reply = "Rehan, abhi " + time + " baj rahe hain.";
+    return "Sir, abhi " + time + " baj rahe hain.";
   }
 
-  // DATE COMMAND
-  else if (
+  // DATE
+  if (
     c.includes("date") ||
     c.includes("tareekh") ||
-    c.includes("tarikh") ||
-    c.includes("तारीख") ||
-    c.includes("आज की डेट")
+    c.includes("tarikh")
   ) {
-    let date = new Date().toLocaleDateString(
+    const date = new Date().toLocaleDateString(
       "en-IN",
-      {day:"numeric",month:"long",year:"numeric"}
+      {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }
     );
 
-    reply = "Rehan, aaj ki tareekh " + date + " hai.";
+    return "Sir, aaj ki tareekh " + date + " hai.";
   }
 
-  // DAY COMMAND
-  else if (
+  // DAY
+  if (
+    c.includes("which day") ||
+    c.includes("what day") ||
     c.includes("kaunsa din") ||
-    c.includes("kaun sa din") ||
-    c.includes("aaj ka din") ||
-    c.includes("day") ||
-    c.includes("weekday") ||
-    c.includes("कौन सा दिन") ||
-    c.includes("आज कौन सा दिन")
+    c.includes("aaj ka din")
   ) {
-    let day = new Date().toLocaleDateString(
+    const day = new Date().toLocaleDateString(
       "en-IN",
-      {weekday:"long"}
+      { weekday: "long" }
     );
 
-    reply = "Rehan, aaj " + day + " hai.";
+    return "Sir, aaj " + day + " hai.";
   }
 
-  // NAME COMMAND
-  else if (
-    c.includes("naam") ||
-    c.includes("name") ||
-    c.includes("naam kya") ||
-    c.includes("नाम")
+  // USER IDENTITY
+  if (
+    c.includes("my name") ||
+    c.includes("mera naam") ||
+    c.includes("who am i") ||
+    c.includes("main kaun")
   ) {
-    reply = "Aapka naam " + userName + " hai, Rehan.";
+    return "Sir, aapka naam " +
+      USER_NAME + " hai.";
   }
 
-  // BATTERY COMMAND
-  else if (
+  // ASSISTANT IDENTITY
+  if (
+    c.includes("who are you") ||
+    c.includes("tum kaun ho") ||
+    c.includes("your name")
+  ) {
+    return "Sir, I am JARVIS, your personal AI assistant.";
+  }
+
+  // BATTERY
+  if (
     c.includes("battery") ||
     c.includes("बैटरी")
   ) {
     try {
       if (navigator.getBattery) {
-        let battery = await navigator.getBattery();
-        let level = Math.round(battery.level * 100);
-        reply = "Rehan, aapke phone ki battery " +
-          level + " percent hai.";
-      } else {
-        reply = "Battery information is device par available nahi hai.";
+        const battery =
+          await navigator.getBattery();
+
+        const level =
+          Math.round(battery.level * 100);
+
+        return "Sir, your battery level is " +
+          level + " percent.";
       }
+
+      return "Sir, battery information is not supported by this browser.";
+
     } catch (error) {
-      reply = "Battery information nahi mil paayi.";
+      return "Sir, battery information is unavailable.";
     }
   }
 
   // GREETING
-  else if (
-    c.includes("hello") ||
-    c.includes("hi jarvis") ||
-    c.includes("namaste") ||
-    c.includes("नमस्ते")
+  if (
+    /^(hi|hello|hey|namaste|salaam|assalamualaikum)\b/i.test(c)
   ) {
-    reply = "Namaste Rehan! Main Jarvis hoon. Kaise madad karun?";
+    return "Namaste Sir! JARVIS is ready. How may I assist you?";
   }
 
-  // UNKNOWN COMMAND
-else {
-  try {
-    const response = await fetch(
-      "https://sparkling-violet-f98cjarvis-ai.liteh445.workers.dev",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: command
-        })
-      }
-    );
+  return null;
+}
 
-    const data = await response.json();
-    reply = data.reply || "Sorry Rehan, answer nahi mila.";
+// =====================================
+// GEMINI AI CONNECTION
+// =====================================
+
+async function askBrain(command) {
+
+  const history = conversation
+    .slice(-MAX_HISTORY)
+    .map(item => {
+      return item.role.toUpperCase() +
+        ": " + item.content;
+    })
+    .join("\n");
+
+  const prompt = `
+You are JARVIS, a professional personal AI assistant.
+
+USER PROFILE:
+Name: ${USER_NAME}
+Preferred form of address: ${USER_TITLE}
+
+IMPORTANT RULES:
+1. Always address the user as Sir.
+2. Never casually call the user Rehan.
+3. Speak naturally in Hinglish by default.
+4. Understand Hindi, English and Hinglish.
+5. Give accurate, useful and clear answers.
+6. For complex questions, explain step by step.
+7. Never pretend to have performed an action you cannot perform.
+8. Be respectful, intelligent and professional.
+9. Remember the recent conversation provided below.
+
+RECENT CONVERSATION:
+${history || "No previous conversation."}
+
+CURRENT QUESTION:
+${command}
+
+Respond directly to the current question.
+`;
+
+  const controller = new AbortController();
+
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, 45000);
+
+  try {
+
+    const response = await fetch(WORKER_URL, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        message: prompt
+      }),
+
+      signal: controller.signal
+    });
+
+    const raw = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error(
+        "Server returned an invalid response."
+      );
+    }
+
+    if (!response.ok || data.success === false) {
+      throw new Error(
+        data.error ||
+        data.reply ||
+        "AI server error: " + response.status
+      );
+    }
+
+    if (
+      typeof data.reply !== "string" ||
+      !data.reply.trim()
+    ) {
+      throw new Error("AI returned an empty answer.");
+    }
+
+    return data.reply.trim();
+
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+// =====================================
+// MAIN RESPONSE ENGINE
+// =====================================
+
+async function answer(command) {
+
+  if (isThinking) return;
+
+  const question = command.trim();
+
+  if (!question) return;
+
+  isThinking = true;
+
+  addMessage(question, "user");
+
+  heardElement.innerText =
+    "You said: " + question;
+
+  setStatus("PROCESSING REQUEST", true);
+
+  let reply = "";
+
+  try {
+
+    reply = await localCommand(question);
+
+    if (!reply) {
+      setStatus("CONNECTING TO AI BRAIN", true);
+      reply = await askBrain(question);
+    }
+
+    saveConversation(question, reply);
+
+    addMessage(reply, "jarvis");
+
+    heardElement.innerText =
+      "JARVIS: " + reply;
+
+    setStatus("RESPONSE READY");
+
+    speak(reply);
 
   } catch (error) {
-    reply = "Rehan, mera Brain abhi connect nahi ho pa raha.";
+
+    console.error("JARVIS ERROR:", error);
+
+    let errorMessage =
+      error.name === "AbortError"
+        ? "Request timed out. Please try again, Sir."
+        : error.message ||
+          "Brain connection failed. Please try again, Sir.";
+
+    reply = "Sorry Sir. " + errorMessage;
+
+    addMessage(reply, "jarvis");
+
+    heardElement.innerText = reply;
+
+    setStatus("CONNECTION ERROR");
+
+    speak(reply);
+
+  } finally {
+    isThinking = false;
   }
 }
 
-  document.getElementById("status").innerText =
-    "Responding";
+// =====================================
+// TEXT INPUT
+// =====================================
 
-  speak(reply);
+function sendTypedMessage() {
+
+  const input =
+    document.getElementById("messageInput");
+
+  const message = input.value.trim();
+
+  if (!message || isThinking) return;
+
+  input.value = "";
+
+  answer(message);
 }
+
+document.getElementById("messageInput")
+  .addEventListener("keydown", function(event) {
+
+    if (event.key === "Enter") {
+      sendTypedMessage();
+    }
+
+  });
+
+// =====================================
+// VOICE RECOGNITION
+// =====================================
 
 function listen() {
 
-  const Recognition =
+  const SpeechRecognition =
     window.SpeechRecognition ||
     window.webkitSpeechRecognition;
 
-  if (!Recognition) {
-    document.getElementById("status").innerText =
-      "Speech recognition unavailable";
+  if (!SpeechRecognition) {
+
+    setStatus("VOICE RECOGNITION UNAVAILABLE");
+
+    heardElement.innerText =
+      "Sir, please use the text input.";
+
     return;
   }
 
-  let recognition = new Recognition();
+  if (isListening || isThinking) return;
+
+  recognition = new SpeechRecognition();
 
   recognition.lang = "hi-IN";
   recognition.continuous = false;
   recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
 
-  document.getElementById("status").innerText =
-    "Listening...";
+  recognition.onstart = () => {
+    isListening = true;
+    micButton.disabled = true;
+    setStatus("LISTENING...", true);
+    heardElement.innerText =
+      "Listening, Sir...";
+  };
 
-  recognition.onresult = function(event) {
+  recognition.onresult = event => {
 
-    let command =
+    const command =
       event.results[0][0].transcript;
 
-    document.getElementById("heard").innerText =
-      "You said: " + command;
+    isListening = false;
 
     answer(command);
   };
 
-  recognition.onerror = function(event) {
-    document.getElementById("status").innerText =
-      "Mic error: " + event.error;
+  recognition.onerror = event => {
+
+    isListening = false;
+
+    heardElement.innerText =
+      "Microphone error: " + event.error;
+
+    setStatus("MICROPHONE ERROR");
   };
 
-  recognition.onend = function() {
+  recognition.onend = () => {
+
+    isListening = false;
+    micButton.disabled = false;
+
     if (
-      document.getElementById("status").innerText ===
-      "Listening..."
+      !isThinking &&
+      statusElement.innerText === "LISTENING..."
     ) {
-      document.getElementById("status").innerText =
-        "System Online";
+      setStatus("SYSTEM ONLINE");
     }
   };
 
   try {
     recognition.start();
   } catch (error) {
-    document.getElementById("status").innerText =
-      "Please try again";
+    isListening = false;
+    micButton.disabled = false;
+    setStatus("PLEASE TRY AGAIN");
   }
 }
 
+// =====================================
+// START SYSTEM
+// =====================================
+
+function startJarvis() {
+
+  speak(
+    "Namaste Sir. JARVIS online hai. Main aapki kya madad kar sakta hoon?"
+  );
+}
+
+window.addEventListener("load", () => {
+
+  setStatus("SYSTEM ONLINE");
+
+  if ("speechSynthesis" in window) {
+    speechSynthesis.getVoices();
+  }
+
+});
+
 </script>
+
 </body>
 </html>
-
-
-
